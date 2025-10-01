@@ -52,12 +52,17 @@ export default function ArticleCard({
 
         {/* Content HTML tronqué */}
         <Box
-          fontSize="md"
-          color="gray.700"
-          maxH="100px"
-          overflow="hidden"
-          dangerouslySetInnerHTML={{ __html: content }}
-        />
+            fontSize="md"
+            color="gray.700"
+            display="-webkit-box"
+            overflow="hidden"
+            sx={{
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: "vertical",
+            }}
+            >
+            {Array.isArray(content) ? content[0]?.children?.[0]?.text : content}
+        </Box>
 
         {/* Lire la suite */}
         <Link href={`/articles/${slug}`} passHref>
