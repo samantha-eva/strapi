@@ -33,12 +33,18 @@ async function fetchArticle(slug: string): Promise<Article | null> {
   };
 }
 
-export default async function ArticlePage({ params }: Props) {
-  const article = await fetchArticle(params.slug);
+export default async function ArticlePage(props: Props) {
+  const { slug } = await props.params; // ✅ on attend params
 
-  if (!article) return (
-    <Container py={8}><Text>Aucun article trouvé.</Text></Container>
-  );
+  const article = await fetchArticle(slug);
+
+  if (!article) {
+    return (
+      <Container py={8}>
+        <Text>Aucun article trouvé.</Text>
+      </Container>
+    );
+  }
 
   return (
     <Container maxW="container.md" py={8}>
@@ -52,3 +58,4 @@ export default async function ArticlePage({ params }: Props) {
     </Container>
   );
 }
+
