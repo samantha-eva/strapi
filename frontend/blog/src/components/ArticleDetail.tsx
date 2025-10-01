@@ -18,9 +18,20 @@ export default function ArticleDetail({
   return (
     <VStack align="start" spacing={6} maxW="800px" mx="auto" py={8}>
       <Heading as="h1">{title}</Heading>
-      <Text color="gray.600">{authorName} - {new Date(publishedAt).toLocaleDateString()}</Text>
       <Image src={coverImageUrl} alt={title} borderRadius="md" />
-      <Box className="prose" dangerouslySetInnerHTML={{ __html: content }} />
+      <Box
+          fontSize="md"
+          color="gray.700"
+          display="-webkit-box"
+          overflow="hidden"
+          sx={{
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: "vertical",
+          }}
+        >
+          {Array.isArray(content) ? content[0]?.children?.[0]?.text : content}
+        </Box>
+      <Text color="gray.600">{authorName} - {new Date(publishedAt).toLocaleDateString()}</Text>
     </VStack>
   );
 }

@@ -1,5 +1,5 @@
 import { Box, Image, Text, VStack, Link as ChakraLink } from "@chakra-ui/react";
-import Link from "next/link";
+import NextLink from "next/link";
 
 type ArticleCardProps = {
   slug: string;
@@ -27,49 +27,45 @@ export default function ArticleCard({
       bg="white"
     >
       {/* Image cliquable */}
-      <Link href={`/articles/${slug}`} passHref>
-        <ChakraLink display="block">
-          <Image
-            src={coverImageUrl}
-            alt={title}
-            width="100%"
-            height="200px"
-            objectFit="cover"
-          />
-        </ChakraLink>
-      </Link>
+      <ChakraLink as={NextLink} href={`/articles/${slug}`} display="block">
+        <Image
+          src={coverImageUrl}
+          alt={title}
+          width="100%"
+          height="200px"
+          objectFit="cover"
+        />
+      </ChakraLink>
 
       <VStack align="start" spacing={2} p={4}>
         {/* Title cliquable */}
-        <Link href={`/articles/${slug}`} passHref>
-          <ChakraLink>
-            <Text fontWeight="bold" fontSize="xl">{title}</Text>
-          </ChakraLink>
-        </Link>
+        <ChakraLink as={NextLink} href={`/articles/${slug}`}>
+          <Text fontWeight="bold" fontSize="xl">{title}</Text>
+        </ChakraLink>
 
         <Text fontSize="sm" color="gray.600">{authorName}</Text>
-        <Text fontSize="sm" color="gray.500">{new Date(publishedAt).toLocaleDateString()}</Text>
+        <Text fontSize="sm" color="gray.500">
+          {new Date(publishedAt).toLocaleDateString()}
+        </Text>
 
-        {/* Content HTML tronqué */}
+        {/* Content tronqué */}
         <Box
-            fontSize="md"
-            color="gray.700"
-            display="-webkit-box"
-            overflow="hidden"
-            sx={{
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: "vertical",
-            }}
-            >
-            {Array.isArray(content) ? content[0]?.children?.[0]?.text : content}
+          fontSize="md"
+          color="gray.700"
+          display="-webkit-box"
+          overflow="hidden"
+          sx={{
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: "vertical",
+          }}
+        >
+          {Array.isArray(content) ? content[0]?.children?.[0]?.text : content}
         </Box>
 
         {/* Lire la suite */}
-        <Link href={`/articles/${slug}`} passHref>
-          <ChakraLink color="blue.500" fontSize="sm">
-            Lire la suite →
-          </ChakraLink>
-        </Link>
+        <ChakraLink as={NextLink} href={`/articles/${slug}`} color="blue.500" fontSize="sm">
+          Lire la suite →
+        </ChakraLink>
       </VStack>
     </Box>
   );
