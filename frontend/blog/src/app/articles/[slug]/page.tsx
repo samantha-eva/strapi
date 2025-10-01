@@ -1,5 +1,8 @@
+// app/articles/[slug]/page.tsx
+
 import { Container, Text } from "@chakra-ui/react";
 import ArticleDetail from "@/components/ArticleDetail";
+import CommentsSection from "@/components/CommentsSection";
 
 type Article = {
   id: number;
@@ -9,13 +12,15 @@ type Article = {
   coverImage: { url: string };
   author: { name: string };
   publishedAt: string;
+  comments?: { id: number; authorName: string; content: string }[];
 };
 
 type Props = { params: { slug: string } };
 
+// 👇 Ici on place fetchArticle
 async function fetchArticle(slug: string): Promise<Article | null> {
   const res = await fetch(
-    `http://localhost:1337/api/articles?filters[slug][$eq]=${slug}&populate=coverImage&populate=author`,
+    `http://localhost:1337/api/articles?filters[slug][$eq]=${slug}&populate=coverImage&populate=author&populate=comments`,
     { cache: "no-store" }
   );
   const data = await res.json();
@@ -30,12 +35,13 @@ async function fetchArticle(slug: string): Promise<Article | null> {
     coverImage: { url: item.coverImage?.formats?.large?.url ? `http://localhost:1337${item.coverImage.formats.large.url}` : "" },
     content: item.content,
     author: { name: item.author?.username || "Anonyme" },
+    comments: item.comments || []
   };
 }
 
+// 👇 Composant page détail
 export default async function ArticlePage(props: Props) {
-  const { slug } = await props.params; // ✅ on attend params
-
+  const { slug } = await props.params;
   const article = await fetchArticle(slug);
 
   if (!article) {
@@ -55,7 +61,11 @@ export default async function ArticlePage(props: Props) {
         authorName={article.author.name}
         publishedAt={article.publishedAt}
       />
+
+      <CommentsSection
+        articleId={article.id}
+        initialComments={article.comments || []}
+      />
     </Container>
   );
 }
-
