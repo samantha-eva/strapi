@@ -42,4 +42,4 @@ Ce projet est un **blog headless** utilisant :
 
 ```bash
 git clone <URL_DU_REPO>
-cd strapi
+cd strapi```bash
