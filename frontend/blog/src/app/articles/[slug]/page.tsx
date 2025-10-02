@@ -70,7 +70,6 @@ export default async function ArticlePage(props: Props) {
       />
 
       <CommentsSection
-        articleId={article.id}
         initialComments={article.comments || []}
       />
     </Container>

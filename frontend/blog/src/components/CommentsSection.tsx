@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Box, Button, Input, Textarea, VStack, Text } from "@chakra-ui/react";
+import { useState, useEffect } from "react";
+import { Box, Button, Textarea, VStack, Text } from "@chakra-ui/react";
 
 type Comment = {
   id: number;
@@ -10,45 +10,69 @@ type Comment = {
 };
 
 type CommentsSectionProps = {
-  articleId: number;
   initialComments: Comment[];
 };
 
-export default function CommentsSection({ articleId, initialComments }: CommentsSectionProps) {
+type User = {
+  jwt: string;
+  username: string;
+};
+
+export default function CommentsSection({ initialComments }: CommentsSectionProps) {
   const [comments, setComments] = useState<Comment[]>(initialComments);
-  const [authorName, setAuthorName] = useState("");
   const [content, setContent] = useState("");
+  const [user, setUser] = useState<User | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const stored = localStorage.getItem("user");
+    if (stored) setUser(JSON.parse(stored));
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
 
-    if (!authorName || !content) return;
-
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) {
-      console.error("NEXT_PUBLIC_API_URL n'est pas défini !");
+    if (!user) {
+      setError("Vous devez être connecté pour commenter.");
+      return;
+    }
+    if (!content) {
+      setError("Le commentaire ne peut pas être vide.");
       return;
     }
 
-    const res = await fetch(`${apiUrl}/api/comments`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        data: {
-          article: articleId,
-          authorName,
-          content,
-        },
-      }),
-    });
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (!apiUrl) {
+      setError("Erreur de configuration");
+      return;
+    }
 
-    if (res.ok) {
-      const newComment = await res.json();
-      setComments([...comments, { id: newComment.data.id, authorName, content }]);
-      setAuthorName("");
-      setContent("");
-    } else {
-      console.error("Erreur lors de l'ajout du commentaire");
+    try {
+      const res = await fetch(`${apiUrl}/api/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.jwt}`,
+        },
+        body: JSON.stringify({
+          data: {
+            content,
+            authorName: user.username,
+          },
+        }),
+      });
+
+      if (res.ok) {
+        const newComment = await res.json();
+        setComments([...comments, { id: newComment.data.id, authorName: user.username, content }]);
+        setContent("");
+      } else {
+        setError("Erreur lors de l'ajout du commentaire");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Erreur lors de l'ajout du commentaire");
     }
   }
 
@@ -58,7 +82,6 @@ export default function CommentsSection({ articleId, initialComments }: Comments
         Commentaires ({comments.length})
       </Text>
 
-      {/* Liste des commentaires */}
       <VStack align="start" spacing={4} mb={6}>
         {comments.map((c) => (
           <Box key={c.id} p={3} borderWidth="1px" borderRadius="md" w="100%">
@@ -68,24 +91,25 @@ export default function CommentsSection({ articleId, initialComments }: Comments
         ))}
       </VStack>
 
-      {/* Formulaire d’ajout */}
-      <form onSubmit={handleSubmit}>
-        <VStack spacing={3} align="stretch">
-          <Input
-            placeholder="Votre nom"
-            value={authorName}
-            onChange={(e) => setAuthorName(e.target.value)}
-          />
-          <Textarea
-            placeholder="Votre commentaire"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-          />
-          <Button type="submit" colorScheme="blue">
-            Ajouter un commentaire
-          </Button>
-        </VStack>
-      </form>
+      {user ? (
+        <form onSubmit={handleSubmit}>
+          <VStack spacing={3} align="stretch">
+            <Textarea
+              placeholder="Votre commentaire"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              required
+            />
+            <Button type="submit" colorScheme="blue">
+              Ajouter un commentaire
+            </Button>
+          </VStack>
+        </form>
+      ) : (
+        <Text color="gray.500">Connectez-vous pour ajouter un commentaire.</Text>
+      )}
+
+      {error && <Text color="red.500" mt={2}>{error}</Text>}
     </Box>
   );
 }
