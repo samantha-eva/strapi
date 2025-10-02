@@ -87,7 +87,7 @@ Strapi sera accessible sur [http://localhost:1337/admin](http://localhost:1337/a
 ### Frontend Next.js
 
 ```bash
-cd ../../frontend
+cd frontend
 npm run dev
 ```
 
