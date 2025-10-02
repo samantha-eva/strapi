@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -25,7 +24,13 @@ export default function CommentsSection({ articleId, initialComments }: Comments
 
     if (!authorName || !content) return;
 
-    const res = await fetch("http://localhost:1337/api/comments", {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (!apiUrl) {
+      console.error("NEXT_PUBLIC_API_URL n'est pas défini !");
+      return;
+    }
+
+    const res = await fetch(`${apiUrl}/api/comments`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -42,6 +47,8 @@ export default function CommentsSection({ articleId, initialComments }: Comments
       setComments([...comments, { id: newComment.data.id, authorName, content }]);
       setAuthorName("");
       setContent("");
+    } else {
+      console.error("Erreur lors de l'ajout du commentaire");
     }
   }
 

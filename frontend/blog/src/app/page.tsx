@@ -1,4 +1,3 @@
-// app/page.tsx
 import { Container, Heading, Text, Button, HStack } from "@chakra-ui/react";
 import Link from "next/link";
 import ArticleGrid from "../components/ArticleGrid";
@@ -15,8 +14,11 @@ type Article = {
 };
 
 async function fetchArticles(page: number = 1): Promise<{ articles: Article[]; pageCount: number }> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!apiUrl) throw new Error("NEXT_PUBLIC_API_URL n'est pas défini dans .env.local");
+
   const res = await fetch(
-    `http://localhost:1337/api/articles?filters[publishStatus][$eq]=published&populate=coverImage&populate=comments&populate=author&pagination[page]=${page}&pagination[pageSize]=6`,
+    `${apiUrl}/api/articles?filters[publishStatus][$eq]=published&populate=coverImage&populate=comments&populate=author&pagination[page]=${page}&pagination[pageSize]=6`,
     { cache: "no-store" }
   );
 
@@ -31,7 +33,7 @@ async function fetchArticles(page: number = 1): Promise<{ articles: Article[]; p
     publishedAt: item.publishedAt,
     coverImage: {
       url: item.coverImage?.formats?.large?.url
-        ? "http://localhost:1337" + item.coverImage.formats.large.url
+        ? `${apiUrl}${item.coverImage.formats.large.url}`
         : "",
     },
     content: item.content,
@@ -45,11 +47,14 @@ async function fetchArticles(page: number = 1): Promise<{ articles: Article[]; p
 }
 
 type Props = {
-  searchParams?: { page?: string };
+  searchParams?: { [key: string]: string | undefined };
 };
 
 export default async function Home({ searchParams }: Props) {
-  const currentPage = parseInt(searchParams?.page || "1", 10);
+  // ⚡ Lecture sécurisée de la page (par défaut = 1)
+  const currentPage = parseInt(searchParams?.page ?? "1", 10);
+
+  // Récupération des articles
   const { articles, pageCount } = await fetchArticles(currentPage);
 
   return (
@@ -68,7 +73,6 @@ export default async function Home({ searchParams }: Props) {
               </Link>
             )}
 
-            {/* Numéros de pages */}
             {Array.from({ length: pageCount }).map((_, i) => {
               const page = i + 1;
               return (

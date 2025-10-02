@@ -1,5 +1,4 @@
 // app/articles/[slug]/page.tsx
-
 import { Container, Text } from "@chakra-ui/react";
 import ArticleDetail from "@/components/ArticleDetail";
 import CommentsSection from "@/components/CommentsSection";
@@ -17,12 +16,16 @@ type Article = {
 
 type Props = { params: { slug: string } };
 
-// 👇 Ici on place fetchArticle
+// Fetch article depuis Strapi
 async function fetchArticle(slug: string): Promise<Article | null> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!apiUrl) throw new Error("NEXT_PUBLIC_API_URL n'est pas défini dans .env.local");
+
   const res = await fetch(
-    `http://localhost:1337/api/articles?filters[slug][$eq]=${slug}&populate=coverImage&populate=author&populate=comments`,
+    `${apiUrl}/api/articles?filters[slug][$eq]=${slug}&populate=coverImage&populate=author&populate=comments`,
     { cache: "no-store" }
   );
+
   const data = await res.json();
   if (!data?.data || data.data.length === 0) return null;
 
@@ -32,16 +35,20 @@ async function fetchArticle(slug: string): Promise<Article | null> {
     title: item.title,
     slug: item.slug,
     publishedAt: item.publishedAt,
-    coverImage: { url: item.coverImage?.formats?.large?.url ? `http://localhost:1337${item.coverImage.formats.large.url}` : "" },
+    coverImage: { 
+      url: item.coverImage?.formats?.large?.url 
+        ? `${apiUrl}${item.coverImage.formats.large.url}` 
+        : "" 
+    },
     content: item.content,
     author: { name: item.author?.username || "Anonyme" },
     comments: item.comments || []
   };
 }
 
-// 👇 Composant page détail
+// Composant page détail
 export default async function ArticlePage(props: Props) {
-  const { slug } = await props.params;
+  const { slug } = await props.params; // ⚡ Next.js App Router nécessite await pour params
   const article = await fetchArticle(slug);
 
   if (!article) {
