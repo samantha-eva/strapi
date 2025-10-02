@@ -116,7 +116,7 @@ Exemples :
 
 ## Frontend
 
-- Next.js avec SSR/SSG pour les pages articles et page d’accueil  
+- Next.jspour les pages articles et page d’accueil  
 - Chakra UI pour le design responsive et accessible  
 
 ---
