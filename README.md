@@ -48,7 +48,7 @@ git clone <URL_DU_REPO>
 ### 2️⃣ Installer les dépendances Backend (Strapi)
 
 ```bash
-cd cms_strapi/strapi/headless-blog
+cd strapi/headless-blog
 npm install
 ```
 
@@ -78,7 +78,7 @@ Dans le dossier **backend** Strapi, tu peux également configurer un `.env` si n
 ### Backend Strapi
 
 ```bash
-cd cms_strapi/strapi/headless-blog
+cd strapi/headless-blog
 npm run develop
 ```
 
